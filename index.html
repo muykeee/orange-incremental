@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麦橘增量游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #FFA500;
+        }
+        .game-container {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(255,165,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .orange {
+            font-size: 64px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+        .orange:active {
+            transform: scale(0.95);
+        }
+        .resources {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .resource {
+            margin: 10px;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border-radius: 5px;
+            cursor: pointer;
+            width: calc(50% - 20px);
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .resource:hover {
+            background-color: #4a4a4a;
+        }
+        .resource:active {
+            transform: scale(0.98);
+        }
+        .popup {
+            position: absolute;
+            animation: popup 0.5s ease-out;
+            pointer-events: none;
+            font-weight: bold;
+            color: #FFA500;
+        }
+        @keyframes popup {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        .resource-info {
+            font-size: 0.8em;
+            margin-top: 5px;
+            color: #FFD700;
+        }
+        #perSecond {
+            font-size: 0.9em;
+            margin-top: 5px;
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="orange" class="orange">🍊</div>
+        <div id="maitangCount">麦橘: 0</div>
+        <div id="perSecond">每秒: 0 麦橘</div>
+        <div class="resources">
+            <div class="resource" onclick="buyResource('creator')">
+                <div>创作者</div>
+                <div id="creatorCount">0</div>
+                <div id="creatorCost" class="resource-info"></div>
+                <div class="resource-info">每秒产出1麦橘</div>
+            </div>
+            <div class="resource" onclick="buyResource('community')">
+                <div>社群</div>
+                <div id="communityCount">0</div>
+                <div id="communityCost" class="resource-info"></div>
+                <div class="resource-info">每秒发现1个创作者</div>
+            </div>
+            <div class="resource" onclick="buyResource('kol')">
+                <div>KOL</div>
+                <div id="kolCount">0</div>
+                <div id="kolCost" class="resource-info"></div>
+                <div class="resource-info">每秒创建1个社群</div>
+            </div>
+            <div class="resource" onclick="buyResource('society')">
+                <div>社区</div>
+                <div id="societyCount">0</div>
+                <div id="societyCost" class="resource-info"></div>
+                <div class="resource-info">每秒培育1个KOL</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let resources = {
+            maitang: 0,
+            creator: 0,
+            community: 0,
+            kol: 0,
+            society: 0
+        };
+
+        let costs = {
+            creator: 15,
+            community: 50,
+            kol: 500,
+            society: 5000
+        };
+
+        let production = {
+            creator: 1,
+            community: 1,
+            kol: 1,
+            society: 1
+        };
+
+        let costGrowth = {
+            creator: 1.05,
+            community: 1.15,
+            kol: 1.17,
+            society: 1.19
+        };
+
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + "兆";
+            if (num >= 1e8) return (num / 1e8).toFixed(2) + "亿";
+            if (num >= 1e4) return (num / 1e4).toFixed(2) + "万";
+            return Math.floor(num);
+        }
+
+        function updateDisplay() {
+            document.getElementById('maitangCount').innerText = `麦橘: ${formatNumber(resources.maitang)}`;
+            updateResource('creator');
+            updateResource('community');
+            updateResource('kol');
+            updateResource('society');
+            updatePerSecond();
+        }
+
+        function updateResource(type) {
+            document.getElementById(`${type}Count`).innerText = formatNumber(resources[type]);
+            document.getElementById(`${type}Cost`).innerText = `成本: ${formatNumber(costs[type])} ${getCostType(type)}`;
+        }
+
+        function updatePerSecond() {
+            let perSecond = resources.creator * production.creator;
+            document.getElementById('perSecond').innerText = `每秒: ${formatNumber(perSecond)} 麦橘`;
+        }
+
+        function getCostType(type) {
+            switch(type) {
+                case 'creator': return '麦橘';
+                case 'community': return '创作者';
+                case 'kol': return '社群';
+                case 'society': return 'KOL';
+            }
+        }
+
+        function produce() {
+            resources.maitang += resources.creator * production.creator / 10;
+            resources.creator += resources.community * production.community / 10;
+            resources.community += resources.kol * production.kol / 10;
+            resources.kol += resources.society * production.society / 10;
+        }
+
+        function buyResource(type) {
+            let costResource = type === 'creator' ? 'maitang' : type === 'community' ? 'creator' : type === 'kol' ? 'community' : 'kol';
+            if (resources[costResource] >= costs[type]) {
+                resources[costResource] -= costs[type];
+                resources[type]++;
+                costs[type] = Math.ceil(costs[type] * costGrowth[type]);
+                updateDisplay();
+            }
+        }
+
+        function createPopup(x, y, text) {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+            popup.textContent = text;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 500);
+        }
+
+        document.getElementById('orange').addEventListener('click', function(event) {
+            let gain = 1 + Math.floor(resources.creator / 10);
+            resources.maitang += gain;
+            createPopup(event.clientX, event.clientY, `+${gain}`);
+            updateDisplay();
+        });
+
+        setInterval(produce, 100);
+        setInterval(updateDisplay, 100);
+
+        updateDisplay();
+    </script>
+</body>
+</html>
