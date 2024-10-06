@@ -21,7 +21,7 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(255,165,0,0.3);
             text-align: center;
-            max-width: 400px;
+            max-width: 600px;
             width: 100%;
         }
         .orange {
@@ -39,13 +39,19 @@
             justify-content: space-around;
             margin-top: 20px;
         }
+        .resource-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 10px;
+        }
         .resource {
-            margin: 10px;
+            flex: 1;
+            margin: 5px;
             padding: 10px;
             background-color: #3a3a3a;
             border-radius: 5px;
             cursor: pointer;
-            width: calc(50% - 20px);
             transition: background-color 0.3s, transform 0.1s;
         }
         .resource:hover {
@@ -85,6 +91,73 @@
             color: #87CEEB;
             margin-top: 2px;
         }
+        #rebirthInfo {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #FF69B4;
+        }
+        #rebirthButton {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #rebirthButton:hover {
+            background-color: #FF1493;
+        }
+        #gameOverContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        #gameOverMessage {
+            background-color: #2a2a2a;
+            color: #FFA500;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            text-align: center;
+        }
+        #restartButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #FFA500;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+        #restartButton:hover {
+            background-color: #FF8C00;
+        }
+        .buyMax {
+            margin-top: 5px;
+            padding: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.3s;
+        }
+        .buyMax:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -93,38 +166,57 @@
         <div id="maitangCount">麦橘: 0</div>
         <div id="perSecond">每秒: 0 麦橘</div>
         <div class="resources">
-            <div class="resource" onclick="buyResource('creator')">
-                <div>创作者</div>
-                <div id="creatorCount">0</div>
-                <div id="creatorCost" class="resource-info"></div>
-                <div class="resource-info">每秒产出1麦橘</div>
-                <div id="creatorUpgrade" class="upgrade-info"></div>
-                <div id="creatorNextMilestone" class="next-milestone"></div>
+            <div class="resource-row">
+                <div class="resource" onclick="buyResource('creator')">
+                    <div>创作者</div>
+                    <div id="creatorCount">0</div>
+                    <div id="creatorCost" class="resource-info"></div>
+                    <div class="resource-info">每秒产出1麦橘</div>
+                    <div id="creatorUpgrade" class="upgrade-info"></div>
+                    <div id="creatorNextMilestone" class="next-milestone"></div>
+                    <button class="buyMax" onclick="buyMax('creator'); event.stopPropagation();">购买最大</button>
+                </div>
+                <div class="resource" onclick="buyResource('community')">
+                    <div>社群</div>
+                    <div id="communityCount">0</div>
+                    <div id="communityCost" class="resource-info"></div>
+                    <div class="resource-info">每秒发现1个创作者</div>
+                    <div id="communityUpgrade" class="upgrade-info"></div>
+                    <div id="communityNextMilestone" class="next-milestone"></div>
+                    <button class="buyMax" onclick="buyMax('community'); event.stopPropagation();">购买最大</button>
+                </div>
             </div>
-            <div class="resource" onclick="buyResource('community')">
-                <div>社群</div>
-                <div id="communityCount">0</div>
-                <div id="communityCost" class="resource-info"></div>
-                <div class="resource-info">每秒发现1个创作者</div>
-                <div id="communityUpgrade" class="upgrade-info"></div>
-                <div id="communityNextMilestone" class="next-milestone"></div>
+            <div class="resource-row">
+                <div class="resource" onclick="buyResource('kol')">
+                    <div>KOL</div>
+                    <div id="kolCount">0</div>
+                    <div id="kolCost" class="resource-info"></div>
+                    <div class="resource-info">每秒创建1个社群</div>
+                    <div id="kolUpgrade" class="upgrade-info"></div>
+                    <div id="kolNextMilestone" class="next-milestone"></div>
+                    <button class="buyMax" onclick="buyMax('kol'); event.stopPropagation();">购买最大</button>
+                </div>
+                <div class="resource" onclick="buyResource('society')">
+                    <div>社区</div>
+                    <div id="societyCount">0</div>
+                    <div id="societyCost" class="resource-info"></div>
+                    <div class="resource-info">每秒培育1个KOL</div>
+                    <div id="societyUpgrade" class="upgrade-info"></div>
+                    <div id="societyNextMilestone" class="next-milestone"></div>
+                    <button class="buyMax" onclick="buyMax('society'); event.stopPropagation();">购买最大</button>
+                </div>
             </div>
-            <div class="resource" onclick="buyResource('kol')">
-                <div>KOL</div>
-                <div id="kolCount">0</div>
-                <div id="kolCost" class="resource-info"></div>
-                <div class="resource-info">每秒创建1个社群</div>
-                <div id="kolUpgrade" class="upgrade-info"></div>
-                <div id="kolNextMilestone" class="next-milestone"></div>
-            </div>
-            <div class="resource" onclick="buyResource('society')">
-                <div>社区</div>
-                <div id="societyCount">0</div>
-                <div id="societyCost" class="resource-info"></div>
-                <div class="resource-info">每秒培育1个KOL</div>
-                <div id="societyUpgrade" class="upgrade-info"></div>
-                <div id="societyNextMilestone" class="next-milestone"></div>
-            </div>
+        </div>
+        <div id="rebirthInfo"></div>
+        <button id="rebirthButton" onclick="rebirth()">转生</button>
+    </div>
+    <div id="gameOverContainer">
+        <div id="gameOverMessage">
+            <h2>恭喜你！</h2>
+            <p>你已经达到了10000亿麦橘，成功完成了游戏！</p>
+            <p>你用了<span id="totalTime"></span>完成了游戏。</p>
+            <p>总共转生了<span id="totalRebirths"></span>次。</p>
+            <button id="restartButton" onclick="restartGame()">重新开始</button>
         </div>
     </div>
 
@@ -139,9 +231,9 @@
 
         let costs = {
             creator: 15,
-            community: 50,
-            kol: 500,
-            society: 5000
+            community: 20,
+            kol: 100,
+            society: 200
         };
 
         let production = {
@@ -153,15 +245,13 @@
 
         let costGrowth = {
             creator: 1.05,
-            community: 1.15,
-            kol: 1.17,
-            society: 1.19
+            community: 1.10,
+            kol: 1.15,
+            society: 1.20
         };
 
-        // 新增：里程碑数组
         const MILESTONES = [10, 25, 50, 100, 200, 500, 1000];
 
-        // 新增：升级次数统计
         let upgradeCounts = {
             creator: 0,
             community: 0,
@@ -169,13 +259,18 @@
             society: 0
         };
 
-        // 新增：升级倍数
         let upgradeMultipliers = {
             creator: 1,
             community: 1,
             kol: 1,
             society: 1
         };
+
+        let rebirthCount = 0;
+        let rebirthMultiplier = 1;
+        let rebirthThreshold = 100000;
+
+        let startTime = new Date();
 
         function getNextMilestone(count) {
             return MILESTONES.find(m => m > count) || "已达到最高级别";
@@ -195,6 +290,8 @@
             updateResource('kol');
             updateResource('society');
             updatePerSecond();
+            updateRebirthInfo();
+            checkGameOver();
         }
 
         function updateResource(type) {
@@ -203,7 +300,6 @@
             document.getElementById(`${type}Upgrade`).innerText = 
                 `升级次数: ${upgradeCounts[type]} (${upgradeMultipliers[type]}倍)`;
             
-            // 新增：显示下一个里程碑
             const nextMilestone = getNextMilestone(upgradeCounts[type]);
             document.getElementById(`${type}NextMilestone`).innerText = 
                 typeof nextMilestone === "number" ? 
@@ -211,7 +307,7 @@
         }
 
         function updatePerSecond() {
-            let perSecond = resources.creator * production.creator * upgradeMultipliers.creator;
+            let perSecond = resources.creator * production.creator * upgradeMultipliers.creator * rebirthMultiplier;
             document.getElementById('perSecond').innerText = `每秒: ${formatNumber(perSecond)} 麦橘`;
         }
 
@@ -225,10 +321,10 @@
         }
 
         function produce() {
-            resources.maitang += resources.creator * production.creator * upgradeMultipliers.creator / 10;
-            resources.creator += resources.community * production.community * upgradeMultipliers.community / 10;
-            resources.community += resources.kol * production.kol * upgradeMultipliers.kol / 10;
-            resources.kol += resources.society * production.society * upgradeMultipliers.society / 10;
+            resources.maitang += resources.creator * production.creator * upgradeMultipliers.creator * rebirthMultiplier / 10;
+            resources.creator += resources.community * production.community * upgradeMultipliers.community * rebirthMultiplier / 10;
+            resources.community += resources.kol * production.kol * upgradeMultipliers.kol * rebirthMultiplier / 10;
+            resources.kol += resources.society * production.society * upgradeMultipliers.society * rebirthMultiplier / 10;
         }
 
         function checkMilestoneBonus(type, count) {
@@ -247,13 +343,41 @@
                 resources[type]++;
                 costs[type] = Math.ceil(costs[type] * costGrowth[type]);
                 
-                // 更新升级次数并检查里程碑
                 upgradeCounts[type]++;
                 if (checkMilestoneBonus(type, upgradeCounts[type])) {
                     createPopup(event.clientX, event.clientY, `${type}效率翻倍！`);
                 }
                 
                 updateDisplay();
+            }
+        }
+
+        function buyMax(type) {
+            let costResource = type === 'creator' ? 'maitang' : type === 'community' ? 'creator' : type === 'kol' ? 'community' : 'kol';
+            let availableResource = resources[costResource];
+            let currentCost = costs[type];
+            let bought = 0;
+
+            while (availableResource >= currentCost) {
+                availableResource -= currentCost;
+                bought++;
+                currentCost = Math.ceil(currentCost * costGrowth[type]);
+            }
+
+            if (bought > 0) {
+                resources[costResource] -= (resources[costResource] - availableResource);
+                resources[type] += bought;
+                costs[type] = currentCost;
+
+                upgradeCounts[type] += bought;
+                for (let i = upgradeCounts[type] - bought + 1; i <= upgradeCounts[type]; i++) {
+                    if (checkMilestoneBonus(type, i)) {
+                        createPopup(event.clientX, event.clientY, `${type}效率翻倍！`);
+                    }
+                }
+
+                updateDisplay();
+                createPopup(event.clientX, event.clientY, `购买了 ${bought} 个 ${type}`);
             }
         }
 
@@ -267,10 +391,70 @@
             setTimeout(() => popup.remove(), 500);
         }
 
+        function updateRebirthInfo() {
+            const rebirthInfo = document.getElementById('rebirthInfo');
+            rebirthInfo.innerText = `转生次数: ${rebirthCount} | 全局产量倍数: ${rebirthMultiplier}倍`;
+            
+            const rebirthButton = document.getElementById('rebirthButton');
+            if (resources.maitang >= rebirthThreshold) {
+                rebirthButton.style.display = 'inline-block';
+                rebirthButton.innerText = `转生 (需要 ${formatNumber(rebirthThreshold)} 麦橘)`;
+            } else {
+                rebirthButton.style.display = 'none';
+            }
+        }
+
+        function rebirth() {
+            if (resources.maitang >= rebirthThreshold) {
+                rebirthCount++;
+                rebirthMultiplier *= 2;
+                rebirthThreshold *= 2;
+                
+                // 重置资源和升级，但保留转生带来的增益
+                resources = {maitang: 0, creator: 0, community: 0, kol: 0, society: 0};
+                upgradeCounts = {creator: 0, community: 0, kol: 0, society: 0};
+                upgradeMultipliers = {creator: 1, community: 1, kol: 1, society: 1};
+                costs = {creator: 15, community: 20, kol: 100, society: 200};
+                
+                updateDisplay();
+                createPopup(event.clientX, event.clientY, "转生成功！全局产量翻倍！");
+            }
+        }
+
+        function checkGameOver() {
+            if (resources.maitang >= 1e12) { // 10000亿
+                const gameOverContainer = document.getElementById('gameOverContainer');
+                gameOverContainer.style.display = 'flex';
+                
+                const endTime = new Date();
+                const timeDiff = endTime - startTime;
+                const hours = Math.floor(timeDiff / 3600000);
+                const minutes = Math.floor((timeDiff % 3600000) / 60000);
+                const seconds = Math.floor((timeDiff % 60000) / 1000);
+                
+                document.getElementById('totalTime').innerText = ` ${hours}小时${minutes}分${seconds}秒 `;
+                document.getElementById('totalRebirths').innerText = ` ${rebirthCount} `;
+            }
+        }
+
+        function restartGame() {
+            resources = {maitang: 0, creator: 0, community: 0, kol: 0, society: 0};
+            upgradeCounts = {creator: 0, community: 0, kol: 0, society: 0};
+            upgradeMultipliers = {creator: 1, community: 1, kol: 1, society: 1};
+            costs = {creator: 15, community: 20, kol: 100, society: 200};
+            rebirthCount = 0;
+            rebirthMultiplier = 1;
+            rebirthThreshold = 100000;
+            startTime = new Date();
+            
+            document.getElementById('gameOverContainer').style.display = 'none';
+            updateDisplay();
+        }
+
         document.getElementById('orange').addEventListener('click', function(event) {
-            let gain = 1 + Math.floor(resources.creator / 10);
+            let gain = (1 + Math.floor(resources.creator / 10)) * rebirthMultiplier;
             resources.maitang += gain;
-            createPopup(event.clientX, event.clientY, `+${gain}`);
+            createPopup(event.clientX, event.clientY, `+${formatNumber(gain)}`);
             updateDisplay();
         });
 
