@@ -75,6 +75,16 @@
             margin-top: 5px;
             color: #FFD700;
         }
+        .upgrade-info {
+            font-size: 0.8em;
+            color: #00FF00;
+            margin-top: 3px;
+        }
+        .next-milestone {
+            font-size: 0.7em;
+            color: #87CEEB;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -88,24 +98,32 @@
                 <div id="creatorCount">0</div>
                 <div id="creatorCost" class="resource-info"></div>
                 <div class="resource-info">每秒产出1麦橘</div>
+                <div id="creatorUpgrade" class="upgrade-info"></div>
+                <div id="creatorNextMilestone" class="next-milestone"></div>
             </div>
             <div class="resource" onclick="buyResource('community')">
                 <div>社群</div>
                 <div id="communityCount">0</div>
                 <div id="communityCost" class="resource-info"></div>
                 <div class="resource-info">每秒发现1个创作者</div>
+                <div id="communityUpgrade" class="upgrade-info"></div>
+                <div id="communityNextMilestone" class="next-milestone"></div>
             </div>
             <div class="resource" onclick="buyResource('kol')">
                 <div>KOL</div>
                 <div id="kolCount">0</div>
                 <div id="kolCost" class="resource-info"></div>
                 <div class="resource-info">每秒创建1个社群</div>
+                <div id="kolUpgrade" class="upgrade-info"></div>
+                <div id="kolNextMilestone" class="next-milestone"></div>
             </div>
             <div class="resource" onclick="buyResource('society')">
                 <div>社区</div>
                 <div id="societyCount">0</div>
                 <div id="societyCost" class="resource-info"></div>
                 <div class="resource-info">每秒培育1个KOL</div>
+                <div id="societyUpgrade" class="upgrade-info"></div>
+                <div id="societyNextMilestone" class="next-milestone"></div>
             </div>
         </div>
     </div>
@@ -140,6 +158,29 @@
             society: 1.19
         };
 
+        // 新增：里程碑数组
+        const MILESTONES = [10, 25, 50, 100, 200, 500, 1000];
+
+        // 新增：升级次数统计
+        let upgradeCounts = {
+            creator: 0,
+            community: 0,
+            kol: 0,
+            society: 0
+        };
+
+        // 新增：升级倍数
+        let upgradeMultipliers = {
+            creator: 1,
+            community: 1,
+            kol: 1,
+            society: 1
+        };
+
+        function getNextMilestone(count) {
+            return MILESTONES.find(m => m > count) || "已达到最高级别";
+        }
+
         function formatNumber(num) {
             if (num >= 1e12) return (num / 1e12).toFixed(2) + "兆";
             if (num >= 1e8) return (num / 1e8).toFixed(2) + "亿";
@@ -159,10 +200,18 @@
         function updateResource(type) {
             document.getElementById(`${type}Count`).innerText = formatNumber(resources[type]);
             document.getElementById(`${type}Cost`).innerText = `成本: ${formatNumber(costs[type])} ${getCostType(type)}`;
+            document.getElementById(`${type}Upgrade`).innerText = 
+                `升级次数: ${upgradeCounts[type]} (${upgradeMultipliers[type]}倍)`;
+            
+            // 新增：显示下一个里程碑
+            const nextMilestone = getNextMilestone(upgradeCounts[type]);
+            document.getElementById(`${type}NextMilestone`).innerText = 
+                typeof nextMilestone === "number" ? 
+                `下一个里程碑: ${nextMilestone}次` : nextMilestone;
         }
 
         function updatePerSecond() {
-            let perSecond = resources.creator * production.creator;
+            let perSecond = resources.creator * production.creator * upgradeMultipliers.creator;
             document.getElementById('perSecond').innerText = `每秒: ${formatNumber(perSecond)} 麦橘`;
         }
 
@@ -176,10 +225,19 @@
         }
 
         function produce() {
-            resources.maitang += resources.creator * production.creator / 10;
-            resources.creator += resources.community * production.community / 10;
-            resources.community += resources.kol * production.kol / 10;
-            resources.kol += resources.society * production.society / 10;
+            resources.maitang += resources.creator * production.creator * upgradeMultipliers.creator / 10;
+            resources.creator += resources.community * production.community * upgradeMultipliers.community / 10;
+            resources.community += resources.kol * production.kol * upgradeMultipliers.kol / 10;
+            resources.kol += resources.society * production.society * upgradeMultipliers.society / 10;
+        }
+
+        function checkMilestoneBonus(type, count) {
+            const prevMilestones = MILESTONES.filter(m => m <= count);
+            if (prevMilestones.length > 0 && prevMilestones[prevMilestones.length - 1] === count) {
+                upgradeMultipliers[type] *= 2;
+                return true;
+            }
+            return false;
         }
 
         function buyResource(type) {
@@ -188,6 +246,13 @@
                 resources[costResource] -= costs[type];
                 resources[type]++;
                 costs[type] = Math.ceil(costs[type] * costGrowth[type]);
+                
+                // 更新升级次数并检查里程碑
+                upgradeCounts[type]++;
+                if (checkMilestoneBonus(type, upgradeCounts[type])) {
+                    createPopup(event.clientX, event.clientY, `${type}效率翻倍！`);
+                }
+                
                 updateDisplay();
             }
         }
